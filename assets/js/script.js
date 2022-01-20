@@ -1,6 +1,7 @@
 var tasks = {};
 
 var auditTask = function(taskEl) {
+
   // get date from task element
   var date = $(taskEl).find("span").text().trim();
 
@@ -187,7 +188,22 @@ $(".card .list-group").sortable({
   tolerance: "pointer",
   helper: "clone",
 
-  update: function(event) {
+  // activate method
+  activate: function(event, ui) {
+    $(this).addClass("dropover");
+    $(".bottom-trash").addClass("bottom-trash-drag");
+  },
+  deactivate: function(event, ui) {
+    $(this).removeClass("dropover");
+    $(".bottom-trash").removeClass("bottom-trash-drag");
+  },
+  over: function(event) {
+    $(event.target).addClass("dropover-active");
+  },
+  out: function(event) {
+    $(event.target).removeClass("dropover-active");
+  },
+  update: function() {
 
     // array to store the task data in
     var tempArr = [];
@@ -226,8 +242,17 @@ $("#trash").droppable({
   accept: ".card .list-group-item",
   tolerance: "touch",
   drop: function(event, ui) {
+     // remove dragged element from the dom
     ui.draggable.remove();
+    $(".bottom-trash").removeClass("bottom-trash-active");
   },
+  over: function(event) {
+    $(".bottom-trash").addclass("bottom-trash-active");
+  },  
+  out: function(event) {
+    $(".bottom-trash").removeClass("bottom-trash-active");
+  }
+
 });
 
 $("#modalDueDate").datepicker({
@@ -235,7 +260,7 @@ $("#modalDueDate").datepicker({
 });
 
 // save button in modal was clicked
-$("#task-form-modal .btn-primary").click(function() {
+$("#task-form-modal .btn-save").click(function() {
   // get form values
   var taskText = $("#modalTaskDescription").val();
   var taskDate = $("#modalDueDate").val();
@@ -267,3 +292,9 @@ $("#remove-tasks").on("click", function() {
 
 // load tasks for the first time
 loadTasks();
+
+setInterval(function () {
+  $(".card .list-group-item").each(function(index, el) {
+    auditTask(el);
+  });
+}, 1800000);
